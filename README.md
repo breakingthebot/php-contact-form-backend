@@ -117,12 +117,15 @@ The next iteration adds request correlation IDs and request-scoped logging conte
 
 The next testing-focused iteration extends the public entrypoint coverage to guarded failure paths. The suite now verifies that the contact entrypoint returns the expected HTTP and JSON responses when a request is rejected for a disallowed origin or for exceeding the rate limit.
 
+The next contract iteration brings the OpenAPI document back in line with the runtime behavior added later in the build. The spec now documents request and response tracing headers explicitly and makes the guarded contact-request behavior clearer for consumers integrating against the backend.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
 - `GET /health.php` reports whether database connectivity and outbound mail configuration are ready.
 - `php bin/migrate.php status` shows discovered and applied migrations, and `php bin/migrate.php migrate` applies pending ones.
 - `docs/openapi.yaml` is the source-of-truth API contract for `/contact.php` and `/health.php`.
+- `docs/openapi.yaml` documents `X-Request-Id` response headers and guarded contact-request failure behavior.
 - The test suite now includes entrypoint-level checks for `public/contact.php` and `public/health.php`.
 - Public responses include `X-Request-Id`, and structured logs include the same request ID for traceability.
 - Public entrypoint integration tests now cover method rejection, success, disallowed origin, rate limiting, and health checks.

@@ -59,3 +59,8 @@
 ## [0.9.0] - 2026-06-28
 - Add negative public entrypoint integration tests for disallowed origins and rate limiting.
 - Extend HTTP-level coverage around guarded contact request failures.
+
+## [0.10.0] - 2026-06-28
+- Extend the OpenAPI contract to document `X-Request-Id` tracing headers.
+- Document guarded contact-request behaviors, including `Origin` handling and rate limiting.
+- Tighten the OpenAPI contract test around tracing and guarded failure details.

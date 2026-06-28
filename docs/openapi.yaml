@@ -6,7 +6,7 @@
 openapi: 3.1.0
 info:
   title: PHP Contact Form Backend API
-  version: 0.6.0
+  version: 0.10.0
   description: >
     Receives contact form submissions and exposes operational readiness checks.
 servers:
@@ -18,6 +18,9 @@ paths:
       summary: Submit a contact request
       description: Validates, guards, stores, and dispatches a contact form submission.
       operationId: submitContactRequest
+      parameters:
+        - $ref: '#/components/parameters/OriginHeader'
+        - $ref: '#/components/parameters/RequestIdHeader'
       requestBody:
         required: true
         content:
@@ -30,6 +33,9 @@ paths:
       responses:
         '201':
           description: Contact request accepted
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/RequestIdHeader'
           content:
             application/json:
               schema:
@@ -39,6 +45,9 @@ paths:
                   $ref: '#/components/examples/ContactResponseCreated'
         '400':
           description: Invalid JSON payload
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/RequestIdHeader'
           content:
             application/json:
               schema:
@@ -48,6 +57,9 @@ paths:
                   $ref: '#/components/examples/ContactResponseInvalidJson'
         '403':
           description: Request origin is not allowed
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/RequestIdHeader'
           content:
             application/json:
               schema:
@@ -57,6 +69,9 @@ paths:
                   $ref: '#/components/examples/ContactResponseDisallowedOrigin'
         '422':
           description: Validation or honeypot failure
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/RequestIdHeader'
           content:
             application/json:
               schema:
@@ -69,7 +84,10 @@ paths:
                 honeypot:
                   $ref: '#/components/examples/ContactResponseHoneypot'
         '429':
-          description: Too many requests
+          description: Too many requests within the configured rate-limit window
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/RequestIdHeader'
           content:
             application/json:
               schema:
@@ -79,6 +97,9 @@ paths:
                   $ref: '#/components/examples/ContactResponseRateLimited'
         '500':
           description: Internal processing failure
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/RequestIdHeader'
           content:
             application/json:
               schema:
@@ -91,9 +112,14 @@ paths:
       summary: Check application readiness
       description: Reports database and outbound mail readiness.
       operationId: checkHealth
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
       responses:
         '200':
           description: All checks healthy
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/RequestIdHeader'
           content:
             application/json:
               schema:
@@ -103,6 +129,9 @@ paths:
                   $ref: '#/components/examples/HealthResponseHealthy'
         '503':
           description: One or more checks degraded
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/RequestIdHeader'
           content:
             application/json:
               schema:
@@ -111,6 +140,30 @@ paths:
                 degraded:
                   $ref: '#/components/examples/HealthResponseDegraded'
 components:
+  parameters:
+    OriginHeader:
+      name: Origin
+      in: header
+      required: false
+      description: >
+        Frontend origin used by the request guard. When `ALLOWED_ORIGINS` is configured,
+        requests from unlisted origins are rejected with `403`.
+      schema:
+        type: string
+    RequestIdHeader:
+      name: X-Request-Id
+      in: header
+      required: false
+      description: >
+        Optional client-supplied correlation ID. If omitted, the server generates one and
+        returns it in the response headers.
+      schema:
+        type: string
+  headers:
+    RequestIdHeader:
+      description: Correlation ID for matching client-visible failures to server-side logs.
+      schema:
+        type: string
   schemas:
     ContactSubmissionRequest:
       type: object

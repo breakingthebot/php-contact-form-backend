@@ -26,7 +26,12 @@ final class OpenApiSpecTest extends TestCase
         self::assertStringContainsString('/health.php:', $spec);
         self::assertStringContainsString("operationId: submitContactRequest", $spec);
         self::assertStringContainsString("operationId: checkHealth", $spec);
+        self::assertStringContainsString("name: X-Request-Id", $spec);
+        self::assertStringContainsString("name: Origin", $spec);
+        self::assertStringContainsString("Too many requests within the configured rate-limit window", $spec);
+        self::assertStringContainsString("Request origin is not allowed", $spec);
         self::assertStringContainsString("'201':", $spec);
         self::assertStringContainsString("'503':", $spec);
+        self::assertStringContainsString("headers:", $spec);
     }
 }
