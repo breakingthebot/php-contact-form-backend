@@ -10,6 +10,10 @@ use App\Services\ContactFormService;
 use App\Services\ContactSubmissionRepository;
 use App\Services\ContactSubmissionRepositoryInterface;
 use App\Services\DatabaseConnectionFactory;
+use App\Services\DatabaseConnectionFactoryInterface;
+use App\Services\Health\DatabaseHealthChecker;
+use App\Services\Health\HealthCheckService;
+use App\Services\Health\MailHealthChecker;
 use App\Services\Mail\MailTransportFactory;
 use App\Services\Security\FileRateLimiter;
 use App\Services\Security\RequestGuard;
@@ -34,12 +38,20 @@ $requestGuard = new RequestGuard(
     )
 );
 $service = new ContactFormService($repository, $mailTransport, $logger, $environment);
+$healthCheckService = new HealthCheckService(
+    [
+        new DatabaseHealthChecker($databaseFactory, $logger),
+        new MailHealthChecker($environment, $logger),
+    ]
+);
 
 return [
     Environment::class => $environment,
     RequestLogger::class => $logger,
     JsonResponder::class => new JsonResponder(),
+    DatabaseConnectionFactoryInterface::class => $databaseFactory,
     ContactSubmissionRepositoryInterface::class => $repository,
     RequestGuard::class => $requestGuard,
+    HealthCheckService::class => $healthCheckService,
     ContactFormService::class => $service,
 ];

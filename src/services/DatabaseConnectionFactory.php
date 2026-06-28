@@ -11,7 +11,7 @@ namespace App\Services;
 use App\Utils\Environment;
 use PDO;
 
-final class DatabaseConnectionFactory
+final class DatabaseConnectionFactory implements DatabaseConnectionFactoryInterface
 {
     /**
      * Initializes the connection factory.

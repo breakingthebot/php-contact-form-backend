@@ -20,10 +20,10 @@ final class ContactSubmissionRepository implements ContactSubmissionRepositoryIn
     /**
      * Initializes the repository.
      *
-     * @param DatabaseConnectionFactory $connectionFactory Creates PDO connections.
+     * @param DatabaseConnectionFactoryInterface $connectionFactory Creates PDO connections.
      */
     public function __construct(
-        private readonly DatabaseConnectionFactory $connectionFactory
+        private readonly DatabaseConnectionFactoryInterface $connectionFactory
     ) {
     }
 

@@ -56,6 +56,12 @@ Use PHP's built-in server from the project root:
 php -S localhost:8000 -t public
 ```
 
+Check operational readiness:
+
+```bash
+curl http://localhost:8000/health.php
+```
+
 Send a POST request to `/contact.php` with JSON:
 
 ```bash
@@ -85,7 +91,10 @@ The third iteration upgrades the delivery path from a placeholder `mail()` imple
 
 The fourth iteration hardens the public endpoint against obvious automated abuse. The controller now runs a dedicated request guard before it hands work to the submission service. That guard checks whether the request origin is allowed, rejects bots that fill a hidden honeypot field, and rate-limits repeated requests from the same IP within a configurable time window.
 
+The fifth iteration adds a separate health endpoint for operational visibility. Instead of mixing readiness checks into the contact submission path, the application now exposes a lightweight diagnostics route that verifies database connectivity and mail transport configuration through dedicated checkers and returns a structured JSON status report.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
+- `GET /health.php` reports whether database connectivity and outbound mail configuration are ready.
 - Tests are included for service and validation behavior. Local execution requires PHP and Composer, and GitHub Actions is configured to run them on push.

@@ -26,3 +26,8 @@
 - Add request abuse protection with origin checks, honeypot validation, and IP-based rate limiting.
 - Add a dedicated request guard service so abuse controls stay at the HTTP boundary.
 - Add tests for origin validation, honeypot validation, and file-backed rate limiting behavior.
+
+## [0.4.0] - 2026-06-28
+- Add a dedicated health-check endpoint for database and mail transport readiness.
+- Add modular health checkers plus an aggregate health service for operational diagnostics.
+- Add tests for database, mail, and aggregate health check behavior.
