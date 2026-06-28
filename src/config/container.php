@@ -10,7 +10,7 @@ use App\Services\ContactFormService;
 use App\Services\ContactSubmissionRepository;
 use App\Services\ContactSubmissionRepositoryInterface;
 use App\Services\DatabaseConnectionFactory;
-use App\Services\Mail\NativeMailTransport;
+use App\Services\Mail\MailTransportFactory;
 use App\Utils\Environment;
 use App\Utils\JsonResponder;
 use App\Utils\RequestLogger;
@@ -21,7 +21,7 @@ $environment = new Environment(dirname(__DIR__, 2) . '/.env');
 $logger = new RequestLogger($environment->get('LOG_PATH', dirname(__DIR__, 2) . '/logs/app.log'));
 $databaseFactory = new DatabaseConnectionFactory($environment);
 $repository = new ContactSubmissionRepository($databaseFactory);
-$mailTransport = new NativeMailTransport($environment, $logger);
+$mailTransport = (new MailTransportFactory($environment, $logger))->create();
 $service = new ContactFormService($repository, $mailTransport, $logger, $environment);
 
 return [

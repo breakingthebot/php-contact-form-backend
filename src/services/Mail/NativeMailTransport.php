@@ -1,6 +1,6 @@
 <?php
 // src/services/Mail/NativeMailTransport.php
-// Sends contact notifications using PHP's native mail transport.
+// Sends contact notifications using PHP's native mail transport as a fallback path.
 // Connects to: src/utils/Environment.php, src/utils/RequestLogger.php
 // Created: 2026-06-28
 
@@ -36,28 +36,21 @@ final class NativeMailTransport implements MailTransportInterface
      */
     public function send(ContactSubmission $submission): void
     {
-        $recipient = $this->environment->requireValue('CONTACT_TO_EMAIL');
-        $sender = $this->environment->requireValue('CONTACT_FROM_EMAIL');
-        $subjectPrefix = $this->environment->get('CONTACT_SUBJECT_PREFIX', '[Contact]');
-        $subject = trim($subjectPrefix . ' New contact request');
+        $notification = (new ContactNotificationContentBuilder($this->environment))
+            ->build($submission);
+
         $headers = [
-            'From: ' . $sender,
+            'From: ' . $notification->fromEmail,
             'Reply-To: ' . $submission->email,
             'Content-Type: text/plain; charset=UTF-8',
         ];
 
-        $body = implode(
-            PHP_EOL . PHP_EOL,
-            [
-                'Name: ' . $submission->name,
-                'Email: ' . $submission->email,
-                'IP Address: ' . ($submission->ipAddress ?? 'unknown'),
-                'Message:',
-                $submission->message,
-            ]
+        $sent = mail(
+            $notification->toEmail,
+            $notification->subject,
+            $notification->textBody,
+            implode(PHP_EOL, $headers)
         );
-
-        $sent = mail($recipient, $subject, $body, implode(PHP_EOL, $headers));
 
         if ($sent) {
             return;
@@ -65,7 +58,7 @@ final class NativeMailTransport implements MailTransportInterface
 
         $this->logger->error(
             'Native mail transport failed to send contact notification.',
-            ['recipient' => $recipient]
+            ['recipient' => $notification->toEmail]
         );
 
         throw new RuntimeException('Native mail transport failed.');

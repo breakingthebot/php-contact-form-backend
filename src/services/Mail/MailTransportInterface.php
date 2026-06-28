@@ -1,7 +1,7 @@
 <?php
 // src/services/Mail/MailTransportInterface.php
 // Defines the contract for sending contact notification emails.
-// Connects to: src/services/ContactFormService.php, src/services/Mail/NativeMailTransport.php
+// Connects to: src/services/ContactFormService.php, src/services/Mail/NativeMailTransport.php, src/services/Mail/SymfonyMailerTransport.php
 // Created: 2026-06-28
 
 declare(strict_types=1);

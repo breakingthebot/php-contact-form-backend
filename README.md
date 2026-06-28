@@ -5,6 +5,7 @@ Receives contact form submissions, validates them, stores them in MySQL, and dis
 ## Stack
 - PHP 8.2+
 - Composer for autoloading and test dependencies
+- Symfony Mailer for SMTP delivery
 - PHPUnit for automated tests
 - GitHub Actions for CI
 - MySQL via PDO
@@ -33,7 +34,9 @@ The application expects the variables defined in `.env.example`.
 - `APP_URL`
 - `CONTACT_TO_EMAIL`
 - `CONTACT_FROM_EMAIL`
+- `CONTACT_FROM_NAME`
 - `CONTACT_SUBJECT_PREFIX`
+- `MAILER_DSN`
 - `DB_HOST`
 - `DB_PORT`
 - `DB_NAME`
@@ -57,6 +60,12 @@ curl -X POST http://localhost:8000/contact.php \
   -d "{\"name\":\"Ada Lovelace\",\"email\":\"ada@example.com\",\"message\":\"Hello from the form.\"}"
 ```
 
+For local SMTP testing, point `MAILER_DSN` at a mail catcher such as Mailpit:
+
+```bash
+MAILER_DSN=smtp://127.0.0.1:1025
+```
+
 ## Deployed
 Not deployed in iteration 1.
 
@@ -67,6 +76,8 @@ The result is a project that is easy to extend incrementally. Iteration 1 focuse
 
 The second iteration hardens the project for real deployment environments by making the autoload layer explicit about the repository's source layout. That matters because Windows tolerates path-case mismatches that Linux CI and many production hosts do not.
 
+The third iteration upgrades the delivery path from a placeholder `mail()` implementation to a real SMTP-capable transport layer. Instead of hardwiring SMTP logic into the service, the application now builds the email message separately and chooses the transport at runtime based on configuration. That keeps the core submission flow stable while making production mail delivery explicit and testable.
+
 ## Notes
-- This iteration uses PHP's native `mail()` transport adapter as the default placeholder. Production SMTP support is a logical next step.
+- SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Tests are included for service and validation behavior. Local execution requires PHP and Composer, and GitHub Actions is configured to run them on push.

@@ -15,3 +15,9 @@
 ## [0.1.1] - 2026-06-28
 - Fix Linux CI autoload failures by making Composer and the local fallback autoloader compatible with the repository's lowercase source folders.
 - Fix test bootstrap and container autoload references after hardening the autoload layer.
+
+## [0.2.0] - 2026-06-28
+- Add configurable SMTP delivery through Symfony Mailer with DSN-based runtime configuration.
+- Add a mail transport factory and message factory so email generation and transport selection stay modular.
+- Keep PHP's native mail transport as a fallback when no SMTP DSN is configured.
+- Add transport and message tests for the new mail delivery layer.
