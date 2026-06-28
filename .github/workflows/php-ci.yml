@@ -1,0 +1,37 @@
+# .github/workflows/php-ci.yml
+# Runs automated PHP test checks for pushes and pull requests.
+# Connects to: composer.json, phpunit.xml, tests/
+# Created: 2026-06-28
+
+name: PHP CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - feature/**
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Validate Composer metadata
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Run PHPUnit
+        run: composer test

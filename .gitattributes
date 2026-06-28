@@ -1,0 +1,8 @@
+# .gitattributes
+# Normalizes repository text files to reduce cross-platform line ending churn.
+# Connects to: .gitignore
+# Created: 2026-06-28
+
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- phpunit.xml -->
+<!-- Configures the automated test suite for service and utility coverage. -->
+<!-- Connects to: tests/, src/ -->
+<!-- Created: 2026-06-28 -->
+<phpunit bootstrap="tests/bootstrap.php"
+         colors="true"
+         cacheResult="false">
+  <testsuites>
+    <testsuite name="Application Test Suite">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>

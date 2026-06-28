@@ -1,0 +1,20 @@
+# .gitignore
+# Ignores local secrets, dependencies, runtime artifacts, and agent instructions.
+# Connects to: .env.example, vendor/, logs/
+# Created: 2026-06-28
+
+.env
+.env.local
+vendor/
+venv/
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store
+*.log
+logs/
+coverage/
+.phpunit.result.cache
+build/
+dist/
+AGENTS.md
