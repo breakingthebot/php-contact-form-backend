@@ -1,0 +1,9 @@
+{
+  "status": "error",
+  "message": "Validation failed.",
+  "errors": [
+    "Name is required.",
+    "Email format is invalid.",
+    "Message must be at least 10 characters."
+  ]
+}

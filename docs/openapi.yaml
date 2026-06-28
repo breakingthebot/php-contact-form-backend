@@ -1,0 +1,260 @@
+# docs/openapi.yaml
+# Defines the public API contract for the contact and health endpoints.
+# Connects to: public/contact.php, public/health.php
+# Created: 2026-06-28
+
+openapi: 3.1.0
+info:
+  title: PHP Contact Form Backend API
+  version: 0.6.0
+  description: >
+    Receives contact form submissions and exposes operational readiness checks.
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+paths:
+  /contact.php:
+    post:
+      summary: Submit a contact request
+      description: Validates, guards, stores, and dispatches a contact form submission.
+      operationId: submitContactRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactSubmissionRequest'
+            examples:
+              valid:
+                $ref: '#/components/examples/ContactRequestValid'
+      responses:
+        '201':
+          description: Contact request accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/ContactResponseCreated'
+        '400':
+          description: Invalid JSON payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidJson:
+                  $ref: '#/components/examples/ContactResponseInvalidJson'
+        '403':
+          description: Request origin is not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badOrigin:
+                  $ref: '#/components/examples/ContactResponseDisallowedOrigin'
+        '422':
+          description: Validation or honeypot failure
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validation:
+                  $ref: '#/components/examples/ContactResponseValidation'
+                honeypot:
+                  $ref: '#/components/examples/ContactResponseHoneypot'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rateLimited:
+                  $ref: '#/components/examples/ContactResponseRateLimited'
+        '500':
+          description: Internal processing failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                processing:
+                  $ref: '#/components/examples/ContactResponseServerError'
+  /health.php:
+    get:
+      summary: Check application readiness
+      description: Reports database and outbound mail readiness.
+      operationId: checkHealth
+      responses:
+        '200':
+          description: All checks healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+              examples:
+                healthy:
+                  $ref: '#/components/examples/HealthResponseHealthy'
+        '503':
+          description: One or more checks degraded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+              examples:
+                degraded:
+                  $ref: '#/components/examples/HealthResponseDegraded'
+components:
+  schemas:
+    ContactSubmissionRequest:
+      type: object
+      additionalProperties: true
+      required:
+        - name
+        - email
+        - message
+      properties:
+        name:
+          type: string
+          maxLength: 120
+        email:
+          type: string
+          format: email
+          maxLength: 190
+        message:
+          type: string
+          minLength: 10
+          maxLength: 5000
+        website:
+          type: string
+          description: Hidden honeypot field that should remain empty.
+    SubmissionResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: string
+          enum: [success]
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: string
+          enum: [error]
+        message:
+          type: string
+    ValidationErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          required:
+            - errors
+          properties:
+            errors:
+              type: array
+              items:
+                type: string
+    HealthCheckResponse:
+      type: object
+      required:
+        - status
+        - checks
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        checks:
+          type: object
+          required:
+            - database
+            - mail
+          properties:
+            database:
+              $ref: '#/components/schemas/ComponentHealth'
+            mail:
+              $ref: '#/components/schemas/ComponentHealth'
+    ComponentHealth:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: string
+          enum: [ok, error]
+        message:
+          type: string
+  examples:
+    ContactRequestValid:
+      value:
+        name: Ada Lovelace
+        email: ada@example.com
+        message: Testing the contact form contract with a valid message.
+        website: ""
+    ContactResponseCreated:
+      value:
+        status: success
+        message: Contact request received successfully.
+    ContactResponseInvalidJson:
+      value:
+        status: error
+        message: Invalid JSON payload.
+    ContactResponseDisallowedOrigin:
+      value:
+        status: error
+        message: Request origin is not allowed.
+    ContactResponseValidation:
+      value:
+        status: error
+        message: Validation failed.
+        errors:
+          - Name is required.
+          - Email format is invalid.
+          - Message must be at least 10 characters.
+    ContactResponseHoneypot:
+      value:
+        status: error
+        message: Validation failed.
+        errors:
+          - Request could not be accepted.
+    ContactResponseRateLimited:
+      value:
+        status: error
+        message: Too many requests. Please try again later.
+    ContactResponseServerError:
+      value:
+        status: error
+        message: Unable to process the contact request at this time.
+    HealthResponseHealthy:
+      value:
+        status: ok
+        checks:
+          database:
+            status: ok
+            message: Database connection is healthy.
+          mail:
+            status: ok
+            message: SMTP mail transport is configured.
+    HealthResponseDegraded:
+      value:
+        status: degraded
+        checks:
+          database:
+            status: ok
+            message: Database connection is healthy.
+          mail:
+            status: error
+            message: Mail configuration is incomplete.

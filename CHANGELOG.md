@@ -36,3 +36,8 @@
 - Replace the one-off schema file with versioned SQL migrations.
 - Add a native migration CLI for checking status and applying pending migrations.
 - Add tests for migration discovery and migration planning behavior.
+
+## [0.6.0] - 2026-06-28
+- Add an OpenAPI 3.1 specification for the public contact and health endpoints.
+- Add example request and response payloads for API consumers.
+- Add a lightweight contract test to keep the OpenAPI document aligned with the current routes.

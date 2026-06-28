@@ -68,6 +68,12 @@ Check migration status:
 php bin/migrate.php status
 ```
 
+Inspect the API contract:
+
+```bash
+Get-Content docs/openapi.yaml
+```
+
 Send a POST request to `/contact.php` with JSON:
 
 ```bash
@@ -101,9 +107,12 @@ The fifth iteration adds a separate health endpoint for operational visibility. 
 
 The sixth iteration adds native schema versioning. Instead of maintaining a single raw schema file, the project now keeps ordered SQL migrations and applies them through a small CLI entrypoint. That makes database changes explicit, repeatable, and easier to review alongside the code that depends on them.
 
+The seventh iteration adds a first-class API contract. The repository now includes an OpenAPI document and concrete JSON examples for the public endpoints, so frontend or integration consumers can rely on a versioned spec instead of reverse-engineering controller behavior from the PHP code.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
 - `GET /health.php` reports whether database connectivity and outbound mail configuration are ready.
 - `php bin/migrate.php status` shows discovered and applied migrations, and `php bin/migrate.php migrate` applies pending ones.
+- `docs/openapi.yaml` is the source-of-truth API contract for `/contact.php` and `/health.php`.
 - Tests are included for service and validation behavior. Local execution requires PHP and Composer, and GitHub Actions is configured to run them on push.

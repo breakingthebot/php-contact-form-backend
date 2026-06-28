@@ -1,0 +1,13 @@
+{
+  "status": "ok",
+  "checks": {
+    "database": {
+      "status": "ok",
+      "message": "Database connection is healthy."
+    },
+    "mail": {
+      "status": "ok",
+      "message": "SMTP mail transport is configured."
+    }
+  }
+}
