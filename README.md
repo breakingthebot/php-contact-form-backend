@@ -115,6 +115,8 @@ The follow-up patch for that iteration fixes a scope edge case in the bootstrap 
 
 The next iteration adds request correlation IDs and request-scoped logging context. Each public request now carries a request ID through the controller flow, returns it in the response headers, and includes it in structured log entries so failures can be traced quickly from a client report back to the exact server-side events.
 
+The next testing-focused iteration extends the public entrypoint coverage to guarded failure paths. The suite now verifies that the contact entrypoint returns the expected HTTP and JSON responses when a request is rejected for a disallowed origin or for exceeding the rate limit.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
@@ -123,4 +125,5 @@ The next iteration adds request correlation IDs and request-scoped logging conte
 - `docs/openapi.yaml` is the source-of-truth API contract for `/contact.php` and `/health.php`.
 - The test suite now includes entrypoint-level checks for `public/contact.php` and `public/health.php`.
 - Public responses include `X-Request-Id`, and structured logs include the same request ID for traceability.
+- Public entrypoint integration tests now cover method rejection, success, disallowed origin, rate limiting, and health checks.
 - Tests are included for service and validation behavior. Local execution requires PHP and Composer, and GitHub Actions is configured to run them on push.

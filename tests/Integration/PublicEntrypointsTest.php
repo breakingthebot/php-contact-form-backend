@@ -133,6 +133,121 @@ final class PublicEntrypointsTest extends TestCase
     }
 
     /**
+     * Confirms the contact entrypoint returns a forbidden response for disallowed origins.
+     *
+     * @return void
+     */
+    public function testContactEntrypointReturnsForbiddenWhenGuardBlocksOrigin(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['HTTP_ORIGIN'] = 'https://evil.example.com';
+
+        $GLOBALS['app_container_override'] = [
+            JsonResponder::class => new JsonResponder(),
+            RequestContextFactory::class => new RequestContextFactory(),
+            RequestLogger::class => new RequestLogger(dirname(__DIR__, 2) . '/logs/integration-test.log'),
+            RequestInputReaderInterface::class => new class implements RequestInputReaderInterface {
+                public function read(): string
+                {
+                    return json_encode(
+                        [
+                            'name' => 'Ada Lovelace',
+                            'email' => 'ada@example.com',
+                            'message' => 'This message is valid for integration testing.',
+                        ],
+                        JSON_UNESCAPED_SLASHES
+                    ) ?: '';
+                }
+            },
+            RequestGuard::class => new class {
+                public function guard(array $payload, ?string $ipAddress, ?string $origin): object
+                {
+                    return new \App\Models\SubmissionResult(
+                        403,
+                        'error',
+                        'Request origin is not allowed.'
+                    );
+                }
+            },
+            ContactFormService::class => new class {
+                public function submit(object $submission): object
+                {
+                    throw new \RuntimeException('Should not be called.');
+                }
+            },
+        ];
+
+        $response = $this->runPublicEntrypoint(dirname(__DIR__, 2) . '/public/contact.php');
+
+        self::assertSame(403, $response['status_code']);
+        self::assertSame(
+            [
+                'status' => 'error',
+                'message' => 'Request origin is not allowed.',
+            ],
+            $response['payload']
+        );
+    }
+
+    /**
+     * Confirms the contact entrypoint returns a rate-limit response when the guard blocks the request.
+     *
+     * @return void
+     */
+    public function testContactEntrypointReturnsRateLimitedWhenGuardBlocksRequest(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+
+        $GLOBALS['app_container_override'] = [
+            JsonResponder::class => new JsonResponder(),
+            RequestContextFactory::class => new RequestContextFactory(),
+            RequestLogger::class => new RequestLogger(dirname(__DIR__, 2) . '/logs/integration-test.log'),
+            RequestInputReaderInterface::class => new class implements RequestInputReaderInterface {
+                public function read(): string
+                {
+                    return json_encode(
+                        [
+                            'name' => 'Ada Lovelace',
+                            'email' => 'ada@example.com',
+                            'message' => 'This message is valid for integration testing.',
+                        ],
+                        JSON_UNESCAPED_SLASHES
+                    ) ?: '';
+                }
+            },
+            RequestGuard::class => new class {
+                public function guard(array $payload, ?string $ipAddress, ?string $origin): object
+                {
+                    return new \App\Models\SubmissionResult(
+                        429,
+                        'error',
+                        'Too many requests. Please try again later.'
+                    );
+                }
+            },
+            ContactFormService::class => new class {
+                public function submit(object $submission): object
+                {
+                    throw new \RuntimeException('Should not be called.');
+                }
+            },
+        ];
+
+        $response = $this->runPublicEntrypoint(dirname(__DIR__, 2) . '/public/contact.php');
+
+        self::assertSame(429, $response['status_code']);
+        self::assertSame(
+            [
+                'status' => 'error',
+                'message' => 'Too many requests. Please try again later.',
+            ],
+            $response['payload']
+        );
+    }
+
+    /**
      * Confirms the health entrypoint returns the structured health report.
      *
      * @return void

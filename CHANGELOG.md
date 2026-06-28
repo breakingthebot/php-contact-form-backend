@@ -55,3 +55,7 @@
 - Add request correlation IDs and structured per-request logging context.
 - Return `X-Request-Id` on public responses so client reports can be matched to server logs.
 - Add tests for request context creation and contextual logger behavior.
+
+## [0.9.0] - 2026-06-28
+- Add negative public entrypoint integration tests for disallowed origins and rate limiting.
+- Extend HTTP-level coverage around guarded contact request failures.
