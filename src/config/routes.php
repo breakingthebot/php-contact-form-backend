@@ -9,4 +9,5 @@ declare(strict_types=1);
 return [
     'POST /contact.php' => 'ContactController::handle',
     'GET /health.php' => 'HealthController::handle',
+    'GET /version.php' => 'VersionController::handle',
 ];

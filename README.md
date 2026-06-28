@@ -31,6 +31,8 @@ The application expects the variables defined in `.env.example`.
 
 - `APP_ENV`
 - `APP_DEBUG`
+- `APP_VERSION`
+- `APP_REVISION`
 - `APP_URL`
 - `ALLOWED_ORIGINS`
 - `CONTACT_TO_EMAIL`
@@ -60,6 +62,12 @@ Check operational readiness:
 
 ```bash
 curl http://localhost:8000/health.php
+```
+
+Check build metadata:
+
+```bash
+curl http://localhost:8000/version.php
 ```
 
 Check migration status:
@@ -127,10 +135,13 @@ The next small patch keeps that writer seam compatible with the project’s PHP 
 
 The next diagnostics iteration adds request duration tracking to the existing request-correlation flow. Each public request now records elapsed time in milliseconds alongside the request ID, which makes it much easier to spot slow paths and tie latency back to specific API calls in the structured logs.
 
+The next operational slice adds a version endpoint that reports the app version, revision, and environment directly from runtime configuration. That gives deployments a simple machine-readable way to confirm what build is running without mixing build metadata into the health endpoint.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
 - `GET /health.php` reports whether database connectivity and outbound mail configuration are ready.
+- `GET /version.php` reports app version, revision, and environment metadata.
 - `php bin/migrate.php status` shows discovered, applied, and pending migrations, and `php bin/migrate.php migrate` applies pending ones with a per-run summary.
 - `docs/openapi.yaml` is the source-of-truth API contract for `/contact.php` and `/health.php`.
 - `docs/openapi.yaml` documents `X-Request-Id` response headers and guarded contact-request failure behavior.

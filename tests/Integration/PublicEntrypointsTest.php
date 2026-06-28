@@ -11,6 +11,7 @@ namespace Tests\Integration;
 use App\Services\ContactFormService;
 use App\Services\Health\HealthCheckService;
 use App\Services\Security\RequestGuard;
+use App\Services\Version\VersionInfoService;
 use App\Utils\JsonResponder;
 use App\Utils\RequestContextFactory;
 use App\Utils\RequestInputReaderInterface;
@@ -311,6 +312,50 @@ final class PublicEntrypointsTest extends TestCase
         $logRecord = $this->readLastLogRecord();
         self::assertSame('Completed health request.', $logRecord['message']);
         self::assertSame(200, $logRecord['context']['status_code']);
+        self::assertIsNumeric($logRecord['context']['duration_ms']);
+    }
+
+    /**
+     * Confirms the version entrypoint returns build metadata.
+     *
+     * @return void
+     */
+    public function testVersionEntrypointReturnsBuildMetadata(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        $GLOBALS['app_container_override'] = [
+            JsonResponder::class => new JsonResponder(),
+            RequestContextFactory::class => new RequestContextFactory(),
+            RequestLogger::class => new RequestLogger($this->logPath),
+            VersionInfoService::class => new class {
+                public function get(): object
+                {
+                    return new \App\Models\VersionInfoReport(
+                        200,
+                        '0.13.0',
+                        'abc1234',
+                        'testing'
+                    );
+                }
+            },
+        ];
+
+        $response = $this->runPublicEntrypoint(dirname(__DIR__, 2) . '/public/version.php');
+
+        self::assertSame(200, $response['status_code']);
+        self::assertSame(
+            [
+                'version' => '0.13.0',
+                'revision' => 'abc1234',
+                'environment' => 'testing',
+            ],
+            $response['payload']
+        );
+
+        $logRecord = $this->readLastLogRecord();
+        self::assertSame('Completed version request.', $logRecord['message']);
+        self::assertSame('0.13.0', $logRecord['context']['app_version']);
         self::assertIsNumeric($logRecord['context']['duration_ms']);
     }
 

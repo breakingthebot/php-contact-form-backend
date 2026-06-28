@@ -21,6 +21,7 @@ use App\Services\Migrations\MigrationRepositoryInterface;
 use App\Services\Migrations\MigrationService;
 use App\Services\Security\FileRateLimiter;
 use App\Services\Security\RequestGuard;
+use App\Services\Version\VersionInfoService;
 use App\Utils\Environment;
 use App\Utils\JsonResponder;
 use App\Utils\NativeRequestInputReader;
@@ -69,5 +70,6 @@ return [
     MigrationService::class => $migrationService,
     RequestGuard::class => $requestGuard,
     HealthCheckService::class => $healthCheckService,
+    VersionInfoService::class => new VersionInfoService($environment),
     ContactFormService::class => $service,
 ];

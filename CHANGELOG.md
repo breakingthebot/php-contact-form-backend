@@ -80,3 +80,8 @@
 - Add per-request duration tracking to structured logs.
 - Log elapsed request time for public contact and health entrypoints.
 - Add integration and unit test coverage for request duration logging.
+
+## [0.13.0] - 2026-06-28
+- Add a dedicated version endpoint for app version, revision, and environment metadata.
+- Reuse request correlation and duration logging for version requests.
+- Add integration and service tests for version metadata reporting.
