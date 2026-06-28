@@ -69,3 +69,6 @@
 - Add richer migration CLI status output with discovered, applied, and pending migration details.
 - Return applied migration summaries after `migrate` runs so schema changes are easier to audit.
 - Add tests for detailed migration status payloads and CLI output.
+
+## [0.11.1] - 2026-06-28
+- Fix migration CLI testability by introducing injectable output writers instead of relying on raw `STDOUT` capture.

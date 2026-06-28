@@ -62,10 +62,13 @@ final class MigrationCliApplicationTest extends TestCase
             },
         ];
 
-        $application = new MigrationCliApplication();
-        ob_start();
+        $output = '';
+        $application = new MigrationCliApplication(
+            static function (string $text) use (&$output): void {
+                $output .= $text;
+            }
+        );
         $application->run(['migrate.php', 'status']);
-        $output = ob_get_clean();
 
         self::assertIsString($output);
         self::assertStringContainsString('Discovered: 2', $output);

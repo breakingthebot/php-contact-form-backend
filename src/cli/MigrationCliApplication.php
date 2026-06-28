@@ -13,6 +13,18 @@ use App\Services\Migrations\MigrationService;
 final class MigrationCliApplication
 {
     /**
+     * Initializes the migration CLI application.
+     *
+     * @param callable|null $stdoutWriter Optional writer for standard output.
+     * @param callable|null $stderrWriter Optional writer for error output.
+     */
+    public function __construct(
+        private readonly ?callable $stdoutWriter = null,
+        private readonly ?callable $stderrWriter = null
+    ) {
+    }
+
+    /**
      * Executes the migration CLI command.
      *
      * @param array<int, string> $argv Raw CLI arguments.
@@ -45,7 +57,7 @@ final class MigrationCliApplication
                 return;
 
             default:
-                fwrite(STDERR, "Unknown command: {$command}" . PHP_EOL);
+                $this->writeError("Unknown command: {$command}" . PHP_EOL);
                 $this->writeHelp();
                 exit(1);
         }
@@ -60,10 +72,10 @@ final class MigrationCliApplication
      */
     private function writeStatus(array $status): void
     {
-        fwrite(STDOUT, 'Migrations: ' . ($status['summary'] ?? 'unknown') . PHP_EOL);
-        fwrite(STDOUT, 'Discovered: ' . (string) ($status['discovered_count'] ?? 0) . PHP_EOL);
-        fwrite(STDOUT, 'Applied: ' . (string) ($status['applied_count'] ?? 0) . PHP_EOL);
-        fwrite(STDOUT, 'Pending: ' . (string) ($status['pending_count'] ?? 0) . PHP_EOL);
+        $this->writeOutput('Migrations: ' . ($status['summary'] ?? 'unknown') . PHP_EOL);
+        $this->writeOutput('Discovered: ' . (string) ($status['discovered_count'] ?? 0) . PHP_EOL);
+        $this->writeOutput('Applied: ' . (string) ($status['applied_count'] ?? 0) . PHP_EOL);
+        $this->writeOutput('Pending: ' . (string) ($status['pending_count'] ?? 0) . PHP_EOL);
 
         /** @var array<int, array<string, string>> $discovered */
         $discovered = $status['discovered_migrations'] ?? [];
@@ -79,7 +91,7 @@ final class MigrationCliApplication
         $this->writeMigrationList('Applied in this run', $appliedInRun);
 
         if ($pending === []) {
-            fwrite(STDOUT, 'Pending migrations: none' . PHP_EOL);
+            $this->writeOutput('Pending migrations: none' . PHP_EOL);
             return;
         }
 
@@ -93,7 +105,7 @@ final class MigrationCliApplication
      */
     private function writeHelp(): void
     {
-        fwrite(STDOUT, 'Usage: php bin/migrate.php [migrate|status|help]' . PHP_EOL);
+        $this->writeOutput('Usage: php bin/migrate.php [migrate|status|help]' . PHP_EOL);
     }
 
     /**
@@ -107,7 +119,7 @@ final class MigrationCliApplication
     private function writeMigrationList(string $label, array $migrations): void
     {
         if ($migrations === []) {
-            fwrite(STDOUT, $label . ': none' . PHP_EOL);
+            $this->writeOutput($label . ': none' . PHP_EOL);
             return;
         }
 
@@ -120,6 +132,40 @@ final class MigrationCliApplication
             $migrations
         );
 
-        fwrite(STDOUT, $label . ': ' . implode(', ', $values) . PHP_EOL);
+        $this->writeOutput($label . ': ' . implode(', ', $values) . PHP_EOL);
+    }
+
+    /**
+     * Writes text to standard output.
+     *
+     * @param string $text Output text.
+     *
+     * @return void
+     */
+    private function writeOutput(string $text): void
+    {
+        if ($this->stdoutWriter !== null) {
+            ($this->stdoutWriter)($text);
+            return;
+        }
+
+        fwrite(STDOUT, $text);
+    }
+
+    /**
+     * Writes text to standard error.
+     *
+     * @param string $text Output text.
+     *
+     * @return void
+     */
+    private function writeError(string $text): void
+    {
+        if ($this->stderrWriter !== null) {
+            ($this->stderrWriter)($text);
+            return;
+        }
+
+        fwrite(STDERR, $text);
     }
 }

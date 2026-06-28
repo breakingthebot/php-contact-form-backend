@@ -121,6 +121,8 @@ The next contract iteration brings the OpenAPI document back in line with the ru
 
 The next operational iteration improves the migration CLI output. Instead of only reporting counts, the CLI now shows which migrations were discovered, which are already applied, which remain pending, and which were applied in the current run. That makes schema operations easier to audit during deployment and debugging.
 
+The follow-up patch for that iteration improves the CLI implementation itself by making its output writer injectable. That keeps the terminal behavior unchanged for real usage while making the CLI output verifiable in automated tests.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
