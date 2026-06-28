@@ -20,10 +20,10 @@ Receives contact form submissions, validates them, stores them in MySQL, and dis
 composer install
 ```
 
-5. Create the database table:
+5. Run database migrations:
 
 ```bash
-mysql -u your_user -p your_database < database/schema.sql
+php bin/migrate.php migrate
 ```
 
 ## Environment Variables
@@ -62,6 +62,12 @@ Check operational readiness:
 curl http://localhost:8000/health.php
 ```
 
+Check migration status:
+
+```bash
+php bin/migrate.php status
+```
+
 Send a POST request to `/contact.php` with JSON:
 
 ```bash
@@ -93,8 +99,11 @@ The fourth iteration hardens the public endpoint against obvious automated abuse
 
 The fifth iteration adds a separate health endpoint for operational visibility. Instead of mixing readiness checks into the contact submission path, the application now exposes a lightweight diagnostics route that verifies database connectivity and mail transport configuration through dedicated checkers and returns a structured JSON status report.
 
+The sixth iteration adds native schema versioning. Instead of maintaining a single raw schema file, the project now keeps ordered SQL migrations and applies them through a small CLI entrypoint. That makes database changes explicit, repeatable, and easier to review alongside the code that depends on them.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
 - `GET /health.php` reports whether database connectivity and outbound mail configuration are ready.
+- `php bin/migrate.php status` shows discovered and applied migrations, and `php bin/migrate.php migrate` applies pending ones.
 - Tests are included for service and validation behavior. Local execution requires PHP and Composer, and GitHub Actions is configured to run them on push.

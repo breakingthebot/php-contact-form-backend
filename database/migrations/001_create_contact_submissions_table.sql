@@ -1,5 +1,5 @@
--- database/schema.sql
--- Creates the table used to persist contact form submissions.
+-- database/migrations/001_create_contact_submissions_table.sql
+-- Creates the primary table used to persist contact form submissions.
 -- Connects to: src/services/ContactSubmissionRepository.php
 -- Created: 2026-06-28
 

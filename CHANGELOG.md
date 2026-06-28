@@ -31,3 +31,8 @@
 - Add a dedicated health-check endpoint for database and mail transport readiness.
 - Add modular health checkers plus an aggregate health service for operational diagnostics.
 - Add tests for database, mail, and aggregate health check behavior.
+
+## [0.5.0] - 2026-06-28
+- Replace the one-off schema file with versioned SQL migrations.
+- Add a native migration CLI for checking status and applying pending migrations.
+- Add tests for migration discovery and migration planning behavior.
