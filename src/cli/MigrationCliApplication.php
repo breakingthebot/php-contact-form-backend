@@ -61,18 +61,29 @@ final class MigrationCliApplication
     private function writeStatus(array $status): void
     {
         fwrite(STDOUT, 'Migrations: ' . ($status['summary'] ?? 'unknown') . PHP_EOL);
+        fwrite(STDOUT, 'Discovered: ' . (string) ($status['discovered_count'] ?? 0) . PHP_EOL);
         fwrite(STDOUT, 'Applied: ' . (string) ($status['applied_count'] ?? 0) . PHP_EOL);
         fwrite(STDOUT, 'Pending: ' . (string) ($status['pending_count'] ?? 0) . PHP_EOL);
 
-        /** @var array<int, string> $pending */
-        $pending = $status['pending_versions'] ?? [];
+        /** @var array<int, array<string, string>> $discovered */
+        $discovered = $status['discovered_migrations'] ?? [];
+        /** @var array<int, array<string, string>> $applied */
+        $applied = $status['applied_migrations'] ?? [];
+        /** @var array<int, array<string, string>> $appliedInRun */
+        $appliedInRun = $status['applied_in_run'] ?? [];
+        /** @var array<int, array<string, string>> $pending */
+        $pending = $status['pending_migrations'] ?? [];
+
+        $this->writeMigrationList('Discovered migrations', $discovered);
+        $this->writeMigrationList('Applied migrations', $applied);
+        $this->writeMigrationList('Applied in this run', $appliedInRun);
 
         if ($pending === []) {
-            fwrite(STDOUT, 'Pending versions: none' . PHP_EOL);
+            fwrite(STDOUT, 'Pending migrations: none' . PHP_EOL);
             return;
         }
 
-        fwrite(STDOUT, 'Pending versions: ' . implode(', ', $pending) . PHP_EOL);
+        $this->writeMigrationList('Pending migrations', $pending);
     }
 
     /**
@@ -83,5 +94,32 @@ final class MigrationCliApplication
     private function writeHelp(): void
     {
         fwrite(STDOUT, 'Usage: php bin/migrate.php [migrate|status|help]' . PHP_EOL);
+    }
+
+    /**
+     * Writes a list of migration details to the terminal.
+     *
+     * @param string $label Section label.
+     * @param array<int, array<string, string>> $migrations Migration detail rows.
+     *
+     * @return void
+     */
+    private function writeMigrationList(string $label, array $migrations): void
+    {
+        if ($migrations === []) {
+            fwrite(STDOUT, $label . ': none' . PHP_EOL);
+            return;
+        }
+
+        $values = array_map(
+            static fn (array $migration): string => sprintf(
+                '%s (%s)',
+                $migration['version'] ?? 'unknown',
+                $migration['name'] ?? 'unnamed'
+            ),
+            $migrations
+        );
+
+        fwrite(STDOUT, $label . ': ' . implode(', ', $values) . PHP_EOL);
     }
 }

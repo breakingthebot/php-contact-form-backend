@@ -47,9 +47,12 @@ final class MigrationServiceTest extends TestCase
         $status = $service->status();
 
         self::assertSame('pending migrations', $status['summary']);
+        self::assertSame(2, $status['discovered_count']);
         self::assertSame(1, $status['applied_count']);
         self::assertSame(1, $status['pending_count']);
+        self::assertSame([['version' => '001', 'name' => 'create table']], $status['applied_migrations']);
         self::assertSame(['002'], $status['pending_versions']);
+        self::assertSame([['version' => '002', 'name' => 'add index']], $status['pending_migrations']);
     }
 
     /**
@@ -86,7 +89,9 @@ final class MigrationServiceTest extends TestCase
         $status = $service->migrate();
 
         self::assertSame('applied pending migrations', $status['summary']);
+        self::assertSame(2, $status['discovered_count']);
         self::assertSame(2, $status['applied_count']);
         self::assertSame(0, $status['pending_count']);
+        self::assertSame([['version' => '002', 'name' => 'add index']], $status['applied_in_run']);
     }
 }

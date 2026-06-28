@@ -119,11 +119,13 @@ The next testing-focused iteration extends the public entrypoint coverage to gua
 
 The next contract iteration brings the OpenAPI document back in line with the runtime behavior added later in the build. The spec now documents request and response tracing headers explicitly and makes the guarded contact-request behavior clearer for consumers integrating against the backend.
 
+The next operational iteration improves the migration CLI output. Instead of only reporting counts, the CLI now shows which migrations were discovered, which are already applied, which remain pending, and which were applied in the current run. That makes schema operations easier to audit during deployment and debugging.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
 - `GET /health.php` reports whether database connectivity and outbound mail configuration are ready.
-- `php bin/migrate.php status` shows discovered and applied migrations, and `php bin/migrate.php migrate` applies pending ones.
+- `php bin/migrate.php status` shows discovered, applied, and pending migrations, and `php bin/migrate.php migrate` applies pending ones with a per-run summary.
 - `docs/openapi.yaml` is the source-of-truth API contract for `/contact.php` and `/health.php`.
 - `docs/openapi.yaml` documents `X-Request-Id` response headers and guarded contact-request failure behavior.
 - The test suite now includes entrypoint-level checks for `public/contact.php` and `public/health.php`.
