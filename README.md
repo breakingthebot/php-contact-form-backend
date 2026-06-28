@@ -111,6 +111,8 @@ The seventh iteration adds a first-class API contract. The repository now includ
 
 The eighth iteration adds public entrypoint integration tests. Instead of stopping at service-level unit tests, the suite now exercises the actual PHP entry files with controlled request inputs and container overrides, which gives better confidence that the route wiring and JSON responses behave as expected.
 
+The follow-up patch for that iteration fixes a scope edge case in the bootstrap flow. The app now publishes the resolved container into true global scope as well, which keeps production behavior the same while allowing the entrypoint tests to include the public files safely from inside PHPUnit methods.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.

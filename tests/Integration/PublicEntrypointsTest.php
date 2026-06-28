@@ -177,8 +177,13 @@ final class PublicEntrypointsTest extends TestCase
     {
         http_response_code(200);
         ob_start();
-        require $entrypoint;
-        $output = ob_get_clean();
+        try {
+            require $entrypoint;
+            $output = ob_get_clean();
+        } catch (\Throwable $exception) {
+            ob_end_clean();
+            throw $exception;
+        }
 
         return [
             'status_code' => http_response_code(),

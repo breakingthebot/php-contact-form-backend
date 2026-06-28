@@ -46,3 +46,7 @@
 - Add endpoint-level integration tests for the public contact and health entrypoints.
 - Add a request input reader abstraction and bootstrap container override seam to support entrypoint testing.
 - Keep runtime behavior unchanged while making public HTTP flows testable in PHPUnit.
+
+## [0.7.1] - 2026-06-28
+- Fix bootstrap container scope so public entrypoint integration tests work when files are required inside PHPUnit methods.
+- Ensure integration test helpers always close output buffers cleanly.
