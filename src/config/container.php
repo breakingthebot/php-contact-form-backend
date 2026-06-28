@@ -11,6 +11,8 @@ use App\Services\ContactSubmissionRepository;
 use App\Services\ContactSubmissionRepositoryInterface;
 use App\Services\DatabaseConnectionFactory;
 use App\Services\Mail\MailTransportFactory;
+use App\Services\Security\FileRateLimiter;
+use App\Services\Security\RequestGuard;
 use App\Utils\Environment;
 use App\Utils\JsonResponder;
 use App\Utils\RequestLogger;
@@ -22,6 +24,15 @@ $logger = new RequestLogger($environment->get('LOG_PATH', dirname(__DIR__, 2) . 
 $databaseFactory = new DatabaseConnectionFactory($environment);
 $repository = new ContactSubmissionRepository($databaseFactory);
 $mailTransport = (new MailTransportFactory($environment, $logger))->create();
+$requestGuard = new RequestGuard(
+    $environment,
+    $logger,
+    new FileRateLimiter(
+        $environment->get('LOG_PATH', dirname(__DIR__, 2) . '/logs/app.log') . '.rate-limit.json',
+        $environment,
+        $logger
+    )
+);
 $service = new ContactFormService($repository, $mailTransport, $logger, $environment);
 
 return [
@@ -29,5 +40,6 @@ return [
     RequestLogger::class => $logger,
     JsonResponder::class => new JsonResponder(),
     ContactSubmissionRepositoryInterface::class => $repository,
+    RequestGuard::class => $requestGuard,
     ContactFormService::class => $service,
 ];

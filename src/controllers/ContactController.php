@@ -10,6 +10,7 @@ namespace App\Controllers;
 
 use App\Models\ContactSubmission;
 use App\Services\ContactFormService;
+use App\Services\Security\RequestGuard;
 use App\Utils\JsonResponder;
 
 final class ContactController
@@ -27,6 +28,8 @@ final class ContactController
         $service = $container[ContactFormService::class];
         /** @var JsonResponder $responder */
         $responder = $container[JsonResponder::class];
+        /** @var RequestGuard $requestGuard */
+        $requestGuard = $container[RequestGuard::class];
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $responder->send(
@@ -50,6 +53,17 @@ final class ContactController
                     'message' => 'Invalid JSON payload.',
                 ]
             );
+            return;
+        }
+
+        $guardResult = $requestGuard->guard(
+            $payload,
+            $_SERVER['REMOTE_ADDR'] ?? null,
+            $_SERVER['HTTP_ORIGIN'] ?? null
+        );
+
+        if ($guardResult !== null) {
+            $responder->send($guardResult->statusCode, $guardResult->toArray());
             return;
         }
 

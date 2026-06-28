@@ -21,3 +21,8 @@
 - Add a mail transport factory and message factory so email generation and transport selection stay modular.
 - Keep PHP's native mail transport as a fallback when no SMTP DSN is configured.
 - Add transport and message tests for the new mail delivery layer.
+
+## [0.3.0] - 2026-06-28
+- Add request abuse protection with origin checks, honeypot validation, and IP-based rate limiting.
+- Add a dedicated request guard service so abuse controls stay at the HTTP boundary.
+- Add tests for origin validation, honeypot validation, and file-backed rate limiting behavior.

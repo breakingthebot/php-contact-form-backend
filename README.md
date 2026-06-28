@@ -32,11 +32,15 @@ The application expects the variables defined in `.env.example`.
 - `APP_ENV`
 - `APP_DEBUG`
 - `APP_URL`
+- `ALLOWED_ORIGINS`
 - `CONTACT_TO_EMAIL`
 - `CONTACT_FROM_EMAIL`
 - `CONTACT_FROM_NAME`
 - `CONTACT_SUBJECT_PREFIX`
+- `HONEYPOT_FIELD_NAME`
 - `MAILER_DSN`
+- `RATE_LIMIT_MAX_ATTEMPTS`
+- `RATE_LIMIT_WINDOW_SECONDS`
 - `DB_HOST`
 - `DB_PORT`
 - `DB_NAME`
@@ -57,6 +61,7 @@ Send a POST request to `/contact.php` with JSON:
 ```bash
 curl -X POST http://localhost:8000/contact.php \
   -H "Content-Type: application/json" \
+  -H "Origin: http://localhost:3000" \
   -d "{\"name\":\"Ada Lovelace\",\"email\":\"ada@example.com\",\"message\":\"Hello from the form.\"}"
 ```
 
@@ -78,6 +83,9 @@ The second iteration hardens the project for real deployment environments by mak
 
 The third iteration upgrades the delivery path from a placeholder `mail()` implementation to a real SMTP-capable transport layer. Instead of hardwiring SMTP logic into the service, the application now builds the email message separately and chooses the transport at runtime based on configuration. That keeps the core submission flow stable while making production mail delivery explicit and testable.
 
+The fourth iteration hardens the public endpoint against obvious automated abuse. The controller now runs a dedicated request guard before it hands work to the submission service. That guard checks whether the request origin is allowed, rejects bots that fill a hidden honeypot field, and rate-limits repeated requests from the same IP within a configurable time window.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
+- Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
 - Tests are included for service and validation behavior. Local execution requires PHP and Composer, and GitHub Actions is configured to run them on push.
