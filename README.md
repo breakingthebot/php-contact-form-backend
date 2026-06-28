@@ -125,6 +125,8 @@ The follow-up patch for that iteration improves the CLI implementation itself by
 
 The next small patch keeps that writer seam compatible with the project’s PHP runtime by switching the internal writer properties to docblock-typed storage instead of an unsupported property type declaration.
 
+The next diagnostics iteration adds request duration tracking to the existing request-correlation flow. Each public request now records elapsed time in milliseconds alongside the request ID, which makes it much easier to spot slow paths and tie latency back to specific API calls in the structured logs.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
@@ -134,5 +136,6 @@ The next small patch keeps that writer seam compatible with the project’s PHP 
 - `docs/openapi.yaml` documents `X-Request-Id` response headers and guarded contact-request failure behavior.
 - The test suite now includes entrypoint-level checks for `public/contact.php` and `public/health.php`.
 - Public responses include `X-Request-Id`, and structured logs include the same request ID for traceability.
+- Structured request logs now include `duration_ms` for public entrypoints.
 - Public entrypoint integration tests now cover method rejection, success, disallowed origin, rate limiting, and health checks.
 - Tests are included for service and validation behavior. Local execution requires PHP and Composer, and GitHub Actions is configured to run them on push.

@@ -37,7 +37,10 @@ final class HealthController
         $responseHeaders = ['X-Request-Id' => $requestContext->requestId];
 
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-            $requestLogger->error('Rejected health request due to unsupported method.');
+            $requestLogger->error(
+                'Rejected health request due to unsupported method.',
+                ['duration_ms' => $requestContext->durationMilliseconds()]
+            );
             $responder->send(
                 405,
                 [
@@ -52,7 +55,11 @@ final class HealthController
         $report = $service->check();
         $requestLogger->info(
             'Completed health request.',
-            ['status_code' => $report->statusCode, 'result_status' => $report->status]
+            [
+                'status_code' => $report->statusCode,
+                'result_status' => $report->status,
+                'duration_ms' => $requestContext->durationMilliseconds(),
+            ]
         );
         $responder->send($report->statusCode, $report->toArray(), $responseHeaders);
     }

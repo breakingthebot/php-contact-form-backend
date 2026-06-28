@@ -19,6 +19,19 @@ use PHPUnit\Framework\TestCase;
 
 final class PublicEntrypointsTest extends TestCase
 {
+    private string $logPath;
+
+    /**
+     * Sets up a dedicated log file for each integration test run.
+     *
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        $this->logPath = dirname(__DIR__, 2) . '/logs/integration-test.log';
+        @unlink($this->logPath);
+    }
+
     /**
      * Clears global request state after each test run.
      *
@@ -29,6 +42,7 @@ final class PublicEntrypointsTest extends TestCase
         unset($GLOBALS['app_container_override']);
         $_SERVER = [];
         http_response_code(200);
+        @unlink($this->logPath);
     }
 
     /**
@@ -42,7 +56,7 @@ final class PublicEntrypointsTest extends TestCase
         $GLOBALS['app_container_override'] = [
             JsonResponder::class => new JsonResponder(),
             RequestContextFactory::class => new RequestContextFactory(),
-            RequestLogger::class => new RequestLogger(dirname(__DIR__, 2) . '/logs/integration-test.log'),
+            RequestLogger::class => new RequestLogger($this->logPath),
             RequestInputReaderInterface::class => new class implements RequestInputReaderInterface {
                 public function read(): string
                 {
@@ -88,7 +102,7 @@ final class PublicEntrypointsTest extends TestCase
         $GLOBALS['app_container_override'] = [
             JsonResponder::class => new JsonResponder(),
             RequestContextFactory::class => new RequestContextFactory(),
-            RequestLogger::class => new RequestLogger(dirname(__DIR__, 2) . '/logs/integration-test.log'),
+            RequestLogger::class => new RequestLogger($this->logPath),
             RequestInputReaderInterface::class => new class implements RequestInputReaderInterface {
                 public function read(): string
                 {
@@ -130,6 +144,12 @@ final class PublicEntrypointsTest extends TestCase
             ],
             $response['payload']
         );
+
+        $logRecord = $this->readLastLogRecord();
+        self::assertSame('Completed contact request.', $logRecord['message']);
+        self::assertSame(201, $logRecord['context']['status_code']);
+        self::assertIsNumeric($logRecord['context']['duration_ms']);
+        self::assertGreaterThanOrEqual(0, (float) $logRecord['context']['duration_ms']);
     }
 
     /**
@@ -146,7 +166,7 @@ final class PublicEntrypointsTest extends TestCase
         $GLOBALS['app_container_override'] = [
             JsonResponder::class => new JsonResponder(),
             RequestContextFactory::class => new RequestContextFactory(),
-            RequestLogger::class => new RequestLogger(dirname(__DIR__, 2) . '/logs/integration-test.log'),
+            RequestLogger::class => new RequestLogger($this->logPath),
             RequestInputReaderInterface::class => new class implements RequestInputReaderInterface {
                 public function read(): string
                 {
@@ -203,7 +223,7 @@ final class PublicEntrypointsTest extends TestCase
         $GLOBALS['app_container_override'] = [
             JsonResponder::class => new JsonResponder(),
             RequestContextFactory::class => new RequestContextFactory(),
-            RequestLogger::class => new RequestLogger(dirname(__DIR__, 2) . '/logs/integration-test.log'),
+            RequestLogger::class => new RequestLogger($this->logPath),
             RequestInputReaderInterface::class => new class implements RequestInputReaderInterface {
                 public function read(): string
                 {
@@ -259,7 +279,7 @@ final class PublicEntrypointsTest extends TestCase
         $GLOBALS['app_container_override'] = [
             JsonResponder::class => new JsonResponder(),
             RequestContextFactory::class => new RequestContextFactory(),
-            RequestLogger::class => new RequestLogger(dirname(__DIR__, 2) . '/logs/integration-test.log'),
+            RequestLogger::class => new RequestLogger($this->logPath),
             HealthCheckService::class => new class {
                 public function check(): object
                 {
@@ -287,6 +307,11 @@ final class PublicEntrypointsTest extends TestCase
         self::assertSame('ok', $response['payload']['status']);
         self::assertSame('ok', $response['payload']['checks']['database']['status']);
         self::assertSame('ok', $response['payload']['checks']['mail']['status']);
+
+        $logRecord = $this->readLastLogRecord();
+        self::assertSame('Completed health request.', $logRecord['message']);
+        self::assertSame(200, $logRecord['context']['status_code']);
+        self::assertIsNumeric($logRecord['context']['duration_ms']);
     }
 
     /**
@@ -312,5 +337,30 @@ final class PublicEntrypointsTest extends TestCase
             'status_code' => http_response_code(),
             'payload' => json_decode((string) $output, true),
         ];
+    }
+
+    /**
+     * Reads the last structured log record written during the test.
+     *
+     * @return array<string, mixed>
+     */
+    private function readLastLogRecord(): array
+    {
+        $contents = file_get_contents($this->logPath);
+        self::assertIsString($contents);
+
+        $lines = array_values(
+            array_filter(
+                array_map('trim', explode(PHP_EOL, $contents)),
+                static fn (string $line): bool => $line !== ''
+            )
+        );
+
+        self::assertNotEmpty($lines);
+
+        /** @var array<string, mixed> $decoded */
+        $decoded = json_decode($lines[count($lines) - 1], true);
+
+        return $decoded;
     }
 }

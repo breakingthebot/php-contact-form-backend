@@ -41,6 +41,7 @@ final class RequestContextFactoryTest extends TestCase
         self::assertSame('POST', $context->method);
         self::assertSame('/contact.php', $context->path);
         self::assertSame('127.0.0.1', $context->ipAddress);
+        self::assertGreaterThan(0, $context->startedAt);
     }
 
     /**
@@ -53,5 +54,6 @@ final class RequestContextFactoryTest extends TestCase
         $context = (new RequestContextFactory())->createFromGlobals();
 
         self::assertMatchesRegularExpression('/^[a-f0-9]{32}$/', $context->requestId);
+        self::assertGreaterThanOrEqual(0, $context->durationMilliseconds());
     }
 }

@@ -23,8 +23,9 @@ final class RequestContextFactory
         $method = (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET');
         $path = (string) ($_SERVER['REQUEST_URI'] ?? '/');
         $ipAddress = isset($_SERVER['REMOTE_ADDR']) ? (string) $_SERVER['REMOTE_ADDR'] : null;
+        $startedAt = microtime(true);
 
-        return new RequestContext($requestId, $method, $path, $ipAddress);
+        return new RequestContext($requestId, $method, $path, $ipAddress, $startedAt);
     }
 
     /**

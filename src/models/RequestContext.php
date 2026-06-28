@@ -17,12 +17,14 @@ final class RequestContext
      * @param string $method HTTP request method.
      * @param string $path Request path.
      * @param string|null $ipAddress Client IP address when available.
+     * @param float $startedAt Request start time as a Unix timestamp with microseconds.
      */
     public function __construct(
         public readonly string $requestId,
         public readonly string $method,
         public readonly string $path,
-        public readonly ?string $ipAddress
+        public readonly ?string $ipAddress,
+        public readonly float $startedAt
     ) {
     }
 
@@ -39,5 +41,15 @@ final class RequestContext
             'path' => $this->path,
             'ip_address' => $this->ipAddress,
         ];
+    }
+
+    /**
+     * Returns the elapsed request duration in milliseconds.
+     *
+     * @return float
+     */
+    public function durationMilliseconds(): float
+    {
+        return round((microtime(true) - $this->startedAt) * 1000, 3);
     }
 }

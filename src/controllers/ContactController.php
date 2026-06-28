@@ -44,7 +44,10 @@ final class ContactController
         $responseHeaders = ['X-Request-Id' => $requestContext->requestId];
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $requestLogger->error('Rejected contact request due to unsupported method.');
+            $requestLogger->error(
+                'Rejected contact request due to unsupported method.',
+                ['duration_ms' => $requestContext->durationMilliseconds()]
+            );
             $responder->send(
                 405,
                 [
@@ -60,7 +63,10 @@ final class ContactController
         $payload = json_decode($rawInput ?: '{}', true);
 
         if (!is_array($payload)) {
-            $requestLogger->error('Rejected contact request due to invalid JSON payload.');
+            $requestLogger->error(
+                'Rejected contact request due to invalid JSON payload.',
+                ['duration_ms' => $requestContext->durationMilliseconds()]
+            );
             $responder->send(
                 400,
                 [
@@ -83,7 +89,10 @@ final class ContactController
         if ($guardResult !== null) {
             $requestLogger->error(
                 'Blocked contact request during guard checks.',
-                ['status_code' => $guardResult->statusCode]
+                [
+                    'status_code' => $guardResult->statusCode,
+                    'duration_ms' => $requestContext->durationMilliseconds(),
+                ]
             );
             $responder->send($guardResult->statusCode, $guardResult->toArray(), $responseHeaders);
             return;
@@ -98,7 +107,11 @@ final class ContactController
 
         $requestLogger->info(
             'Completed contact request.',
-            ['status_code' => $result->statusCode, 'result_status' => $result->status]
+            [
+                'status_code' => $result->statusCode,
+                'result_status' => $result->status,
+                'duration_ms' => $requestContext->durationMilliseconds(),
+            ]
         );
 
         $responder->send($result->statusCode, $result->toArray(), $responseHeaders);

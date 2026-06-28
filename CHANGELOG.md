@@ -75,3 +75,8 @@
 
 ## [0.11.2] - 2026-06-28
 - Fix migration CLI writer property declarations for PHP compatibility in CI.
+
+## [0.12.0] - 2026-06-28
+- Add per-request duration tracking to structured logs.
+- Log elapsed request time for public contact and health entrypoints.
+- Add integration and unit test coverage for request duration logging.
