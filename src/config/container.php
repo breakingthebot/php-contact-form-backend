@@ -24,6 +24,7 @@ use App\Services\Security\RequestGuard;
 use App\Utils\Environment;
 use App\Utils\JsonResponder;
 use App\Utils\NativeRequestInputReader;
+use App\Utils\RequestContextFactory;
 use App\Utils\RequestInputReaderInterface;
 use App\Utils\RequestLogger;
 
@@ -60,6 +61,7 @@ return [
     Environment::class => $environment,
     RequestLogger::class => $logger,
     JsonResponder::class => new JsonResponder(),
+    RequestContextFactory::class => new RequestContextFactory(),
     RequestInputReaderInterface::class => new NativeRequestInputReader(),
     DatabaseConnectionFactoryInterface::class => $databaseFactory,
     ContactSubmissionRepositoryInterface::class => $repository,

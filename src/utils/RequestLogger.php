@@ -14,10 +14,27 @@ final class RequestLogger
      * Initializes the request logger.
      *
      * @param string $logPath Destination log file path.
+     * @param array<string, mixed> $baseContext Context that is applied to every log entry.
      */
     public function __construct(
-        private readonly string $logPath
+        private readonly string $logPath,
+        private readonly array $baseContext = []
     ) {
+    }
+
+    /**
+     * Returns a logger with additional base context.
+     *
+     * @param array<string, mixed> $context Context to attach to every derived log entry.
+     *
+     * @return self
+     */
+    public function withContext(array $context): self
+    {
+        return new self(
+            $this->logPath,
+            array_merge($this->baseContext, $context)
+        );
     }
 
     /**
@@ -67,7 +84,7 @@ final class RequestLogger
             'timestamp' => gmdate('c'),
             'level' => $level,
             'message' => $message,
-            'context' => $context,
+            'context' => array_merge($this->baseContext, $context),
         ];
 
         file_put_contents(

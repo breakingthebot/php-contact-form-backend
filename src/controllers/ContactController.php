@@ -12,7 +12,9 @@ use App\Models\ContactSubmission;
 use App\Services\ContactFormService;
 use App\Services\Security\RequestGuard;
 use App\Utils\JsonResponder;
+use App\Utils\RequestContextFactory;
 use App\Utils\RequestInputReaderInterface;
+use App\Utils\RequestLogger;
 
 final class ContactController
 {
@@ -29,18 +31,27 @@ final class ContactController
         $service = $container[ContactFormService::class];
         /** @var JsonResponder $responder */
         $responder = $container[JsonResponder::class];
+        /** @var RequestContextFactory $requestContextFactory */
+        $requestContextFactory = $container[RequestContextFactory::class];
         /** @var RequestInputReaderInterface $inputReader */
         $inputReader = $container[RequestInputReaderInterface::class];
         /** @var RequestGuard $requestGuard */
         $requestGuard = $container[RequestGuard::class];
+        /** @var RequestLogger $logger */
+        $logger = $container[RequestLogger::class];
+        $requestContext = $requestContextFactory->createFromGlobals();
+        $requestLogger = $logger->withContext($requestContext->toArray());
+        $responseHeaders = ['X-Request-Id' => $requestContext->requestId];
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $requestLogger->error('Rejected contact request due to unsupported method.');
             $responder->send(
                 405,
                 [
                     'status' => 'error',
                     'message' => 'Method not allowed.',
-                ]
+                ],
+                $responseHeaders
             );
             return;
         }
@@ -49,15 +60,19 @@ final class ContactController
         $payload = json_decode($rawInput ?: '{}', true);
 
         if (!is_array($payload)) {
+            $requestLogger->error('Rejected contact request due to invalid JSON payload.');
             $responder->send(
                 400,
                 [
                     'status' => 'error',
                     'message' => 'Invalid JSON payload.',
-                ]
+                ],
+                $responseHeaders
             );
             return;
         }
+
+        $requestLogger->info('Received contact request payload.', ['payload_keys' => array_keys($payload)]);
 
         $guardResult = $requestGuard->guard(
             $payload,
@@ -66,7 +81,11 @@ final class ContactController
         );
 
         if ($guardResult !== null) {
-            $responder->send($guardResult->statusCode, $guardResult->toArray());
+            $requestLogger->error(
+                'Blocked contact request during guard checks.',
+                ['status_code' => $guardResult->statusCode]
+            );
+            $responder->send($guardResult->statusCode, $guardResult->toArray(), $responseHeaders);
             return;
         }
 
@@ -77,6 +96,11 @@ final class ContactController
 
         $result = $service->submit($submission);
 
-        $responder->send($result->statusCode, $result->toArray());
+        $requestLogger->info(
+            'Completed contact request.',
+            ['status_code' => $result->statusCode, 'result_status' => $result->status]
+        );
+
+        $responder->send($result->statusCode, $result->toArray(), $responseHeaders);
     }
 }

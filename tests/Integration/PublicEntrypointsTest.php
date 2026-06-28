@@ -12,7 +12,9 @@ use App\Services\ContactFormService;
 use App\Services\Health\HealthCheckService;
 use App\Services\Security\RequestGuard;
 use App\Utils\JsonResponder;
+use App\Utils\RequestContextFactory;
 use App\Utils\RequestInputReaderInterface;
+use App\Utils\RequestLogger;
 use PHPUnit\Framework\TestCase;
 
 final class PublicEntrypointsTest extends TestCase
@@ -39,6 +41,8 @@ final class PublicEntrypointsTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $GLOBALS['app_container_override'] = [
             JsonResponder::class => new JsonResponder(),
+            RequestContextFactory::class => new RequestContextFactory(),
+            RequestLogger::class => new RequestLogger(dirname(__DIR__, 2) . '/logs/integration-test.log'),
             RequestInputReaderInterface::class => new class implements RequestInputReaderInterface {
                 public function read(): string
                 {
@@ -83,6 +87,8 @@ final class PublicEntrypointsTest extends TestCase
 
         $GLOBALS['app_container_override'] = [
             JsonResponder::class => new JsonResponder(),
+            RequestContextFactory::class => new RequestContextFactory(),
+            RequestLogger::class => new RequestLogger(dirname(__DIR__, 2) . '/logs/integration-test.log'),
             RequestInputReaderInterface::class => new class implements RequestInputReaderInterface {
                 public function read(): string
                 {
@@ -137,6 +143,8 @@ final class PublicEntrypointsTest extends TestCase
 
         $GLOBALS['app_container_override'] = [
             JsonResponder::class => new JsonResponder(),
+            RequestContextFactory::class => new RequestContextFactory(),
+            RequestLogger::class => new RequestLogger(dirname(__DIR__, 2) . '/logs/integration-test.log'),
             HealthCheckService::class => new class {
                 public function check(): object
                 {

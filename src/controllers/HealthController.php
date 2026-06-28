@@ -10,6 +10,8 @@ namespace App\Controllers;
 
 use App\Services\Health\HealthCheckService;
 use App\Utils\JsonResponder;
+use App\Utils\RequestContextFactory;
+use App\Utils\RequestLogger;
 
 final class HealthController
 {
@@ -26,19 +28,32 @@ final class HealthController
         $service = $container[HealthCheckService::class];
         /** @var JsonResponder $responder */
         $responder = $container[JsonResponder::class];
+        /** @var RequestContextFactory $requestContextFactory */
+        $requestContextFactory = $container[RequestContextFactory::class];
+        /** @var RequestLogger $logger */
+        $logger = $container[RequestLogger::class];
+        $requestContext = $requestContextFactory->createFromGlobals();
+        $requestLogger = $logger->withContext($requestContext->toArray());
+        $responseHeaders = ['X-Request-Id' => $requestContext->requestId];
 
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            $requestLogger->error('Rejected health request due to unsupported method.');
             $responder->send(
                 405,
                 [
                     'status' => 'error',
                     'message' => 'Method not allowed.',
-                ]
+                ],
+                $responseHeaders
             );
             return;
         }
 
         $report = $service->check();
-        $responder->send($report->statusCode, $report->toArray());
+        $requestLogger->info(
+            'Completed health request.',
+            ['status_code' => $report->statusCode, 'result_status' => $report->status]
+        );
+        $responder->send($report->statusCode, $report->toArray(), $responseHeaders);
     }
 }

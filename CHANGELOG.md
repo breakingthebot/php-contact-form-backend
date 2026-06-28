@@ -50,3 +50,8 @@
 ## [0.7.1] - 2026-06-28
 - Fix bootstrap container scope so public entrypoint integration tests work when files are required inside PHPUnit methods.
 - Ensure integration test helpers always close output buffers cleanly.
+
+## [0.8.0] - 2026-06-28
+- Add request correlation IDs and structured per-request logging context.
+- Return `X-Request-Id` on public responses so client reports can be matched to server logs.
+- Add tests for request context creation and contextual logger behavior.
