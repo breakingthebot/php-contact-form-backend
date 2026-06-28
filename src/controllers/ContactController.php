@@ -12,6 +12,7 @@ use App\Models\ContactSubmission;
 use App\Services\ContactFormService;
 use App\Services\Security\RequestGuard;
 use App\Utils\JsonResponder;
+use App\Utils\RequestInputReaderInterface;
 
 final class ContactController
 {
@@ -28,6 +29,8 @@ final class ContactController
         $service = $container[ContactFormService::class];
         /** @var JsonResponder $responder */
         $responder = $container[JsonResponder::class];
+        /** @var RequestInputReaderInterface $inputReader */
+        $inputReader = $container[RequestInputReaderInterface::class];
         /** @var RequestGuard $requestGuard */
         $requestGuard = $container[RequestGuard::class];
 
@@ -42,7 +45,7 @@ final class ContactController
             return;
         }
 
-        $rawInput = file_get_contents('php://input');
+        $rawInput = $inputReader->read();
         $payload = json_decode($rawInput ?: '{}', true);
 
         if (!is_array($payload)) {

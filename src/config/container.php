@@ -23,6 +23,8 @@ use App\Services\Security\FileRateLimiter;
 use App\Services\Security\RequestGuard;
 use App\Utils\Environment;
 use App\Utils\JsonResponder;
+use App\Utils\NativeRequestInputReader;
+use App\Utils\RequestInputReaderInterface;
 use App\Utils\RequestLogger;
 
 require_once dirname(__DIR__) . '/utils/manual_autoload.php';
@@ -58,6 +60,7 @@ return [
     Environment::class => $environment,
     RequestLogger::class => $logger,
     JsonResponder::class => new JsonResponder(),
+    RequestInputReaderInterface::class => new NativeRequestInputReader(),
     DatabaseConnectionFactoryInterface::class => $databaseFactory,
     ContactSubmissionRepositoryInterface::class => $repository,
     MigrationRepositoryInterface::class => $migrationRepository,

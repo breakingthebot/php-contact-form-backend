@@ -41,3 +41,8 @@
 - Add an OpenAPI 3.1 specification for the public contact and health endpoints.
 - Add example request and response payloads for API consumers.
 - Add a lightweight contract test to keep the OpenAPI document aligned with the current routes.
+
+## [0.7.0] - 2026-06-28
+- Add endpoint-level integration tests for the public contact and health entrypoints.
+- Add a request input reader abstraction and bootstrap container override seam to support entrypoint testing.
+- Keep runtime behavior unchanged while making public HTTP flows testable in PHPUnit.

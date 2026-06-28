@@ -10,4 +10,4 @@ if (is_file(dirname(__DIR__, 2) . '/vendor/autoload.php')) {
     require dirname(__DIR__, 2) . '/vendor/autoload.php';
 }
 
-$container = require __DIR__ . '/container.php';
+$container = $GLOBALS['app_container_override'] ?? require __DIR__ . '/container.php';

@@ -109,10 +109,13 @@ The sixth iteration adds native schema versioning. Instead of maintaining a sing
 
 The seventh iteration adds a first-class API contract. The repository now includes an OpenAPI document and concrete JSON examples for the public endpoints, so frontend or integration consumers can rely on a versioned spec instead of reverse-engineering controller behavior from the PHP code.
 
+The eighth iteration adds public entrypoint integration tests. Instead of stopping at service-level unit tests, the suite now exercises the actual PHP entry files with controlled request inputs and container overrides, which gives better confidence that the route wiring and JSON responses behave as expected.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
 - `GET /health.php` reports whether database connectivity and outbound mail configuration are ready.
 - `php bin/migrate.php status` shows discovered and applied migrations, and `php bin/migrate.php migrate` applies pending ones.
 - `docs/openapi.yaml` is the source-of-truth API contract for `/contact.php` and `/health.php`.
+- The test suite now includes entrypoint-level checks for `public/contact.php` and `public/health.php`.
 - Tests are included for service and validation behavior. Local execution requires PHP and Composer, and GitHub Actions is configured to run them on push.
