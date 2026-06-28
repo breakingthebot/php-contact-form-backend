@@ -20,7 +20,22 @@ spl_autoload_register(
         }
 
         $relativeClass = substr($class, strlen($prefix));
-        $path = dirname(__DIR__) . '/' . str_replace('\\', '/', $relativeClass) . '.php';
+        $relativePath = str_replace('\\', '/', $relativeClass) . '.php';
+        $exactPath = dirname(__DIR__) . '/' . $relativePath;
+
+        if (is_file($exactPath)) {
+            require_once $exactPath;
+            return;
+        }
+
+        $segments = explode('/', $relativePath);
+
+        if ($segments === []) {
+            return;
+        }
+
+        $segments[0] = strtolower($segments[0]);
+        $path = dirname(__DIR__) . '/' . implode('/', $segments);
 
         if (is_file($path)) {
             require_once $path;

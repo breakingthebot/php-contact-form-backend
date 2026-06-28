@@ -65,6 +65,8 @@ This first iteration builds the backend in layers so the HTTP endpoint stays thi
 
 The result is a project that is easy to extend incrementally. Iteration 1 focuses on the contract and control flow: validate hostile input, return clear API responses, log failures with context, and keep MySQL and email integrations isolated behind atomic classes. Later iterations can harden SMTP delivery, add richer persistence features, and wire in CI without changing the public API shape.
 
+The second iteration hardens the project for real deployment environments by making the autoload layer explicit about the repository's source layout. That matters because Windows tolerates path-case mismatches that Linux CI and many production hosts do not.
+
 ## Notes
 - This iteration uses PHP's native `mail()` transport adapter as the default placeholder. Production SMTP support is a logical next step.
 - Tests are included for service and validation behavior. Local execution requires PHP and Composer, and GitHub Actions is configured to run them on push.
