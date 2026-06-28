@@ -72,3 +72,6 @@
 
 ## [0.11.1] - 2026-06-28
 - Fix migration CLI testability by introducing injectable output writers instead of relying on raw `STDOUT` capture.
+
+## [0.11.2] - 2026-06-28
+- Fix migration CLI writer property declarations for PHP compatibility in CI.

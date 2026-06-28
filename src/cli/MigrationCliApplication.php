@@ -12,16 +12,22 @@ use App\Services\Migrations\MigrationService;
 
 final class MigrationCliApplication
 {
+    /** @var callable|null */
+    private readonly mixed $stdoutWriter;
+
+    /** @var callable|null */
+    private readonly mixed $stderrWriter;
+
     /**
      * Initializes the migration CLI application.
      *
      * @param callable|null $stdoutWriter Optional writer for standard output.
      * @param callable|null $stderrWriter Optional writer for error output.
      */
-    public function __construct(
-        private readonly ?callable $stdoutWriter = null,
-        private readonly ?callable $stderrWriter = null
-    ) {
+    public function __construct(?callable $stdoutWriter = null, ?callable $stderrWriter = null)
+    {
+        $this->stdoutWriter = $stdoutWriter;
+        $this->stderrWriter = $stderrWriter;
     }
 
     /**

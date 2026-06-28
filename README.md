@@ -123,6 +123,8 @@ The next operational iteration improves the migration CLI output. Instead of onl
 
 The follow-up patch for that iteration improves the CLI implementation itself by making its output writer injectable. That keeps the terminal behavior unchanged for real usage while making the CLI output verifiable in automated tests.
 
+The next small patch keeps that writer seam compatible with the project’s PHP runtime by switching the internal writer properties to docblock-typed storage instead of an unsupported property type declaration.
+
 ## Notes
 - SMTP delivery is preferred through `MAILER_DSN`; the native PHP mail transport remains as a fallback for environments that have not configured SMTP yet.
 - Abuse protection is configured with `ALLOWED_ORIGINS`, `HONEYPOT_FIELD_NAME`, `RATE_LIMIT_MAX_ATTEMPTS`, and `RATE_LIMIT_WINDOW_SECONDS`.
